@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const { MongoClient, ServerApiVersion, Db } = require("mongodb");
+const { MongoClient, ServerApiVersion, Db, ObjectId } = require("mongodb");
 app.use(cors());
 app.use(express.json());
 const port = process.env.PORT || 4000;
@@ -23,6 +23,8 @@ const run = async () => {
   try {
     await client.connect();
     const userCollection = client.db("recycle_zone").collection("users");
+    const productCollection = client.db("recycle_zone").collection("product");
+    const categoryCollection = client.db("recycle_zone").collection("category");
     //save user info to database
     app.put("/user", async (req, res) => {
       const info = req.body;
@@ -48,6 +50,22 @@ const run = async () => {
       } else {
         return res.send({ isUser: true });
       }
+    });
+
+    app.patch("/addproduct", async (req, res) => {
+      const { category } = req.body;
+      //   console.log(req.body);
+      const result = await categoryCollection.updateOne(
+        { name: category },
+        { $push: { ["product"]: { ...req.body, _id: ObjectId() } } }
+      );
+
+      if (result.modifiedCount > 0) {
+        const insertProduct = await productCollection.insertOne(req.body);
+        console.log(insertProduct);
+        res.send(insertProduct);
+      }
+      console.log(result);
     });
   } finally {
   }
