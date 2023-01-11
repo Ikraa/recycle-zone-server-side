@@ -23,6 +23,7 @@ const run = async () => {
   try {
     await client.connect();
     const userCollection = client.db("recycle_zone").collection("users");
+    //save user info to database
     app.put("/user", async (req, res) => {
       const info = req.body;
       console.log(info);
@@ -32,6 +33,21 @@ const run = async () => {
         { upsert: true }
       );
       res.send(result);
+    });
+
+    //Check account type
+    app.get("/admin/:email", async (req, res) => {
+      console.log(req.params.email);
+      const findByemail = await userCollection.findOne({
+        email: req.params.email,
+      });
+      if (findByemail?.admin == true) {
+        return res.send({ isAdmin: true });
+      } else if (findByemail?.accountType == "seller") {
+        return res.send({ isSeller: true });
+      } else {
+        return res.send({ isUser: true });
+      }
     });
   } finally {
   }
