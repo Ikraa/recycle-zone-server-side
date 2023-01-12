@@ -55,13 +55,17 @@ const run = async () => {
     app.patch("/addproduct", async (req, res) => {
       const { category } = req.body;
       //   console.log(req.body);
+      const primaryKey = ObjectId();
       const result = await categoryCollection.updateOne(
         { name: category },
-        { $push: { ["product"]: { ...req.body, _id: ObjectId() } } }
+        { $push: { ["product"]: { ...req.body, primaryKey: primaryKey } } }
       );
 
       if (result.modifiedCount > 0) {
-        const insertProduct = await productCollection.insertOne(req.body);
+        const insertProduct = await productCollection.insertOne({
+          ...req.body,
+          primaryKey: primaryKey,
+        });
         console.log(insertProduct);
         res.send(insertProduct);
       }
@@ -74,6 +78,27 @@ const run = async () => {
       const id = req.params.id;
       const cursor = await categoryCollection.findOne({ _id: ObjectId(id) });
       res.send(cursor);
+    });
+    // filter product by email
+    app.get("/product/:email", async (req, res) => {
+      const email = req.params.email;
+      const cursor = await productCollection.find({ email: email }).toArray();
+      res.send(cursor);
+    });
+    app.patch("/product/:id", async (req, res) => {
+      const category = req.query.category;
+
+      const primaryKey = req.params.id;
+      const result = await categoryCollection.updateOne(
+        { name: category },
+        { $pull: { ["product"]: { primaryKey: ObjectId(primaryKey) } } }
+      );
+      if (result.modifiedCount > 0) {
+        const cursor = await productCollection.deleteOne({
+          primaryKey: ObjectId(primaryKey),
+        });
+        res.send(cursor);
+      }
     });
   } finally {
   }
