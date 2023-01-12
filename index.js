@@ -65,7 +65,15 @@ const run = async () => {
         console.log(insertProduct);
         res.send(insertProduct);
       }
-      console.log(result);
+    });
+    app.get("/category", async (req, res) => {
+      const cursor = await categoryCollection.find({}).toArray();
+      res.send(cursor);
+    });
+    app.get("/category/:id", async (req, res) => {
+      const id = req.params.id;
+      const cursor = await categoryCollection.findOne({ _id: ObjectId(id) });
+      res.send(cursor);
     });
   } finally {
   }
