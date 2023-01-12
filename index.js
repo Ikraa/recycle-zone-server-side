@@ -5,14 +5,15 @@ const { MongoClient, ServerApiVersion, Db, ObjectId } = require("mongodb");
 app.use(cors());
 app.use(express.json());
 const port = process.env.PORT || 4000;
-///recycle_zone
-//djEKnlc0dBEh03tI
+require("dotenv").config();
+
+///
+//
 app.get("/", (req, res) => {
   res.send("Welcome to Ikra's recycle zone server...:)");
 });
 
-const uri =
-  "mongodb+srv://recycle_zone:djEKnlc0dBEh03tI@cluster0.kzsxnqy.mongodb.net/?retryWrites=true&w=majority";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.kzsxnqy.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -30,7 +31,7 @@ const run = async () => {
     //save user info to database
     app.put("/user", async (req, res) => {
       const info = req.body;
-      console.log(info);
+
       const result = await userCollection.updateOne(
         { email: info.email },
         { $set: info },
@@ -41,7 +42,6 @@ const run = async () => {
 
     //Check account type
     app.get("/admin/:email", async (req, res) => {
-      console.log(req.params.email);
       const findByemail = await userCollection.findOne({
         email: req.params.email,
       });
@@ -56,7 +56,7 @@ const run = async () => {
 
     app.patch("/addproduct", async (req, res) => {
       const { category } = req.body;
-      //   console.log(req.body);
+
       const primaryKey = ObjectId();
       const result = await categoryCollection.updateOne(
         { name: category },
@@ -68,7 +68,7 @@ const run = async () => {
           ...req.body,
           primaryKey: primaryKey,
         });
-        console.log(insertProduct);
+
         res.send(insertProduct);
       }
     });
