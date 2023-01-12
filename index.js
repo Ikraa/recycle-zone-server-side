@@ -25,6 +25,7 @@ const run = async () => {
     const userCollection = client.db("recycle_zone").collection("users");
     const productCollection = client.db("recycle_zone").collection("product");
     const categoryCollection = client.db("recycle_zone").collection("category");
+    const orderCollection = client.db("recycle_zone").collection("order");
     //save user info to database
     app.put("/user", async (req, res) => {
       const info = req.body;
@@ -99,6 +100,36 @@ const run = async () => {
         });
         res.send(cursor);
       }
+    });
+
+    app.post("/book", async (req, res) => {
+      const data = req.body;
+      const result = await orderCollection.insertOne(data);
+      res.send(result);
+    });
+    app.get("/sellers", async (req, res) => {
+      const result = await userCollection
+        .find({ accountType: "seller" })
+        .toArray();
+      res.send(result);
+    });
+    app.delete("/sellers/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await userCollection.deleteOne({ _id: ObjectId(id) });
+
+      res.send(result);
+    });
+    app.get("/buyers", async (req, res) => {
+      const result = await userCollection
+        .find({ accountType: "user" })
+        .toArray();
+      res.send(result);
+    });
+    app.delete("/buyers/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await userCollection.deleteOne({ _id: ObjectId(id) });
+
+      res.send(result);
     });
   } finally {
   }
