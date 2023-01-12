@@ -24,6 +24,7 @@ const run = async () => {
     await client.connect();
     const userCollection = client.db("recycle_zone").collection("users");
     const productCollection = client.db("recycle_zone").collection("product");
+    const adCollection = client.db("recycle_zone").collection("advertise");
     const categoryCollection = client.db("recycle_zone").collection("category");
     const orderCollection = client.db("recycle_zone").collection("order");
     //save user info to database
@@ -129,6 +130,27 @@ const run = async () => {
       const id = req.params.id;
       const result = await userCollection.deleteOne({ _id: ObjectId(id) });
 
+      res.send(result);
+    });
+
+    //
+    app.post("/advertise", async (req, res) => {
+      const { _id } = req.body;
+      const isExist = await adCollection.findOne({ _id: _id });
+      if (isExist) {
+        return res.send({ message: "Item already exist", status: false });
+      }
+      const result = await adCollection.insertOne(data);
+      res.send(result);
+    });
+    app.get("/advertise", async (req, res) => {
+      const result = await adCollection.find({}).toArray();
+      res.send(result);
+    });
+    app.delete("/advertise/:id", async (req, res) => {
+      const result = await adCollection.deleteOne({
+        _id: req?.params?.id,
+      });
       res.send(result);
     });
   } finally {
