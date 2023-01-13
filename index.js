@@ -137,11 +137,13 @@ const run = async () => {
     app.post("/advertise", async (req, res) => {
       const { _id } = req.body;
       const isExist = await adCollection.findOne({ _id: _id });
-      if (isExist) {
+      if (!isExist) {
+        const result = await adCollection.insertOne(req.body);
+        res.send({ message: "Ad Running successfully..", status: true });
+      } else {
         return res.send({ message: "Item already exist", status: false });
       }
-      const result = await adCollection.insertOne(data);
-      res.send(result);
+      // console.log(object);
     });
     app.get("/advertise", async (req, res) => {
       const result = await adCollection.find({}).toArray();
